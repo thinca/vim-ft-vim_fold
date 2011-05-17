@@ -48,7 +48,8 @@ function! VimFold(lnum)
   elseif line =~# '^\s*:\?\s*fu\%[nction]'
   \   || line =~# '^\s*:\?\s*aug\%[roup]'
     let lv += 1
-  elseif line =~# '^\s*\\'
+  endif
+  if line =~# '^\s*\\'
     if next !~# '^\s*\\'
       let lv -= 1
     endif
