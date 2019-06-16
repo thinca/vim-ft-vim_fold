@@ -5,7 +5,7 @@ function! vim#fold#level(lnum)
   let lv = 0
   while 0 <= stridx(line, ms)
     let marker = matchstr(line, '\V' . escape(ms, '\') . '\zs\d\*')
-    if marker != ''
+    if marker !=# ''
       return '>' . marker
     endif
     let line = substitute(line, '\V' . escape(ms, '\'), '', '')
@@ -14,7 +14,7 @@ function! vim#fold#level(lnum)
 
   while 0 <= stridx(line, me)
     let marker = matchstr(line, '\V' . escape(me, '\') . '\zs\d\*')
-    if marker != ''
+    if marker !=# ''
       return '<' . marker
     endif
     let line = substitute(line, '\V' . escape(me, '\'), '', '')
@@ -44,7 +44,7 @@ endfunction
 function! vim#fold#text()
   let line = getline(v:foldstart)
   let linenr = v:foldstart + 1
-  while getline(linenr) =~ '^\s*\\'
+  while getline(linenr) =~# '^\s*\\'
     let line .= matchstr(getline(linenr), '^\s*\\\s\{-}\zs\s\?\S.*$')
     let linenr += 1
   endwhile
