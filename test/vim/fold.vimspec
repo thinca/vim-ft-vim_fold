@@ -1,0 +1,175 @@
+Describe vim#fold#level()
+  Before each
+    enew
+  End
+  After each
+    bwipeout!
+  End
+
+  Context when there is a function
+    It is folded
+      let lines = [
+      \   'function Add(a, b) abort',
+      \   '  return a:a + a:b',
+      \   'endfunction',
+      \ ]
+      call setline(1, lines)
+
+      let expected = [
+      \   '>1',
+      \   1,
+      \   '<1',
+      \ ]
+      let actual = map(range(1, len(lines)), 'vim#fold#level(v:val)')
+      Assert Equals(actual, expected)
+    End
+  End
+
+  Context when there is an augroup
+    It is folded
+      let lines = [
+      \   'augroup vim-hold',
+      \   '  autocmd!',
+      \   '  autocmd FileType vim setlocal foldexpr=vim#fold#level(v:lnum)',
+      \   'augroup END',
+      \ ]
+      call setline(1, lines)
+
+      let expected = [
+      \   '>1',
+      \   1,
+      \   1,
+      \   '<1',
+      \ ]
+      let actual = map(range(1, len(lines)), 'vim#fold#level(v:val)')
+      Assert Equals(actual, expected)
+    End
+  End
+
+  Context when there is a line continuation
+    It is folded
+      let lines = [
+      \   'let list = [',
+      \   '\   1,',
+      \   '\   2,',
+      \   '\   3,',
+      \   '\ ]',
+      \ ]
+      call setline(1, lines)
+
+      let expected = [
+      \   '>1',
+      \   1,
+      \   1,
+      \   1,
+      \   '<1',
+      \ ]
+      let actual = map(range(1, len(lines)), 'vim#fold#level(v:val)')
+      Assert Equals(actual, expected)
+    End
+  End
+
+  Context when there is a marker
+    It is folded
+      setlocal foldmarker={{{,}}}
+      let lines = [
+      \   '{{{2',
+      \   '{{{ {{{',
+      \   'foo',
+      \   '}}}',
+      \   'bar',
+      \   '}}}1',
+      \   'buz',
+      \ ]
+      call setline(1, lines)
+
+      let expected = [
+      \   '>2',
+      \   '>4',
+      \   4,
+      \   '<4',
+      \   3,
+      \   '<1',
+      \   0,
+      \ ]
+      let actual = map(range(1, len(lines)), 'vim#fold#level(v:val)')
+      Assert Equals(actual, expected)
+    End
+  End
+
+  Context when there are some targets
+    It is folded with nested
+      let lines = [
+      \   'function Listener(bufnr,',
+      \   '\                 start, end,',
+      \   '\                 added, changes) abort',
+      \   '  echo a:bufnr',
+      \   '  if 0 < a:added " {{{',
+      \   '    echo a:added',
+      \   '    augroup foo',
+      \   '      autocmd BufWritePost * ++once echo "hi"',
+      \   '    augroup END',
+      \   '  endif " }}}',
+      \   'endfunction',
+      \   'call Listener(1, 1, 1, 1, [])',
+      \ ]
+      call setline(1, lines)
+
+      let expected = [
+      \   '>2',
+      \   2,
+      \   '<2',
+      \   1,
+      \   '>2',
+      \   2,
+      \   '>3',
+      \   3,
+      \   '<3',
+      \   '<2',
+      \   '<1',
+      \   0,
+      \ ]
+      let actual = map(range(1, len(lines)), 'vim#fold#level(v:val)')
+      Assert Equals(actual, expected)
+    End
+  End
+End
+
+Describe vim#fold#text()
+  Before each
+    enew
+  End
+  After each
+    bwipeout!
+  End
+
+  Context when folding is for line continuation
+    It shows all texts
+      let lines = [
+      \   'let nums = {',
+      \   '\   "one": 1,',
+      \   '\ }',
+      \ ]
+      call setline(1, lines)
+      let v:foldstart = 1
+      let v:foldend = len(lines)
+
+      Assert Equals(vim#fold#text(), 'let nums = { "one": 1, }')
+    End
+  End
+
+  Context when folding is not for line continuation
+    It shows default folding text
+      let lines = [
+      \   'function Foo() abort',
+      \   '  echo "foo"',
+      \   'endfunction',
+      \ ]
+      call setline(1, lines)
+      let v:foldstart = 1
+      let v:foldend = len(lines)
+
+      Assert Equals(vim#fold#text(), foldtext())
+    End
+  End
+End
