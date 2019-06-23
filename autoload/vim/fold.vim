@@ -1,4 +1,4 @@
-function! vim#fold#level(lnum)
+function vim#fold#level(lnum) abort
   if b:changedtick != get(b:, 'vim_fold_last_changedtick', -1)
     let b:vim_fold_last_changedtick = b:changedtick
     let b:vim_fold_levels = vim#fold#calculate(bufnr('%'))
@@ -6,7 +6,7 @@ function! vim#fold#level(lnum)
   return get(b:vim_fold_levels, a:lnum, 0)
 endfunction
 
-function! vim#fold#text()
+function vim#fold#text() abort
   let line = getline(v:foldstart)
   let linenr = v:foldstart + 1
   while getline(linenr) =~# '^\s*\\'
